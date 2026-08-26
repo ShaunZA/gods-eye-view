@@ -1,0 +1,17 @@
+name: Auto Sync Fork
+on:
+  schedule:
+    - cron: '0 2 * * *' # Runs daily at 2:00 AM
+  workflow_dispatch: # Allows you to trigger it manually
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Sync with upstream
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh repo sync ${{ github.repository }} --source bilawalsidhu/gods-eye-view
