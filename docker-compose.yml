@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  gods-eye-view:
+    build: .
+    container_name: gods-eye-view
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+      - OPENAI_API_KEY=your_openai_api_key_here
+      # Add any other required proxy keys (.env variables) below as needed:
+      # - AISSTREAM_API_KEY=...
+      # - OPENSKY_CLIENT_ID=...
+      # - OPENSKY_CLIENT_SECRET=...
+      # - TOMTOM_API_KEY=...
+      # - FIRMS_MAP_KEY=...
+    # Alternatively, you can use an external .env file:
+    # env_file:
+    #   - .env
