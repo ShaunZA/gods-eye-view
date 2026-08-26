@@ -9,28 +9,22 @@ services:
       - "${HOST_PORT:-3000}:3000"
     environment:
       # ==========================================================
-      # NOTE: You have to go get these API keys yourself!
-      # Uncomment the variables you need and pass the keys either 
-      # here or through your deployment environment.
+      # NOTE: Pass these variables securely via your deployment 
+      # environment or an external .env file.
       # ==========================================================
-      
-      # - HOST_PORT=3000
-      # - GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-      # - OPENAI_API_KEY=your_openai_api_key_here
-      # - AISSTREAM_API_KEY=your_aisstream_key
-      # - FIRMS_MAP_KEY=your_nasa_firms_key
-      # - TOMTOM_API_KEY=your_tomtom_key
-      # - CESIUM_ION_TOKEN=your_cesium_ion_key
-      
-      # OpenSky Authentication (Use either OAuth OR Basic Auth)
-      # - OPENSKY_AUTH_MODE=oauth
-      # - OPENSKY_CLIENT_ID=your_client_id
-      # - OPENSKY_CLIENT_SECRET=your_client_secret
-      # 
-      # - OPENSKY_AUTH_MODE=basic
-      # - OPENSKY_USERNAME=your_username
-      # - OPENSKY_PASSWORD=your_password
+      - HOST_PORT
+      - GOOGLE_MAPS_API_KEY
+      - OPENAI_API_KEY
+      - AISSTREAM_API_KEY
+      - FIRMS_MAP_KEY
+      - TOMTOM_API_KEY
+      - CESIUM_ION_TOKEN
+      - OPENSKY_AUTH_MODE
+      - OPENSKY_CLIENT_ID
+      - OPENSKY_CLIENT_SECRET
+      - OPENSKY_USERNAME
+      - OPENSKY_PASSWORD
 
-    # Alternatively, you can use an external .env file:
-    # env_file:
-    #   - .env
+# Alternatively, you can use an external .env file:
+# env_file:
+#   - .env
