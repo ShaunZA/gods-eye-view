@@ -7364,10 +7364,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: env.HOST || 'localhost',
       port: parseInt(env.PORT, 10) || 5173,
-      // When binding to all interfaces, allow any host; otherwise restrict to local names
-      allowedHosts: (env.HOST === '0.0.0.0' || env.HOST === '::')
-        ? true
-        : ['localhost', '127.0.0.1', '.local'],
+      allowedHosts: true,
     },
     // Expose selected API keys to the browser via import.meta.env.*
     define: {
