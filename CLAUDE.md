@@ -67,8 +67,9 @@ keys server-side, bypass CORS, enforce opt-in rate limits, and stretch cache TTL
 metered credit budgets (e.g. OpenSky's 4-credits-per-call `/states/all`). Env/API keys are read
 **lazily on first request**, not at import time, because `loadEnv` populates `process.env` after
 the module loads. **Any browser-side call needing a secret or a CORS bypass goes through a proxy
-here.** This is also the single upstream file this fork edits (an `allowedHosts` tweak) — the #1
-merge-conflict watch point.
+here.** We also carry a small `allowedHosts` tweak here — it's the **#1 merge-conflict watch
+point** (the author edits this file often). A feed with `access-control-allow-origin: *` (USGS,
+NOAA SWPC) can be fetched directly from its layer instead, avoiding a proxy edit entirely.
 
 **Render governor — `src/renderGovernor.js`.** Cesium runs on-demand, not a free-running loop.
 Code calls `governorRequestRender()` to schedule a frame, or `holdContinuousRender()` /
