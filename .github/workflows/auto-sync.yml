@@ -1,17 +1,53 @@
-name: Auto Sync Fork
+name: Check upstream for updates
+# NOTE: This deliberately does NOT auto-sync. `gh repo sync` fast-forwards only, and because
+# this fork has its own commits it would either fail or (with --force) DELETE our work.
+# Instead this just NOTIFIES us (opens an issue) when the author pushes new commits, so we can
+# merge them ourselves with:  ./scripts/update-from-upstream.sh
 on:
   schedule:
-    - cron: '0 2 * * *' # Runs daily at 2:00 AM
-  workflow_dispatch: # Allows you to trigger it manually
+    - cron: '0 2 * * *' # daily at 02:00 UTC
+  workflow_dispatch:      # allow manual runs
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
-  sync:
+  check-upstream:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: Sync with upstream
+      - name: Check out this fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Count new upstream commits
+        id: count
+        run: |
+          git remote add upstream https://github.com/bilawalsidhu/gods-eye-view.git
+          git fetch upstream main
+          BEHIND=$(git rev-list --count HEAD..upstream/main)
+          echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+          echo "Upstream is ahead by $BEHIND commit(s)."
+
+      - name: Open an issue if upstream has updates
+        if: steps.count.outputs.behind != '0'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BEHIND: ${{ steps.count.outputs.behind }}
         run: |
-          gh repo sync ${{ github.repository }} --source bilawalsidhu/gods-eye-view
+          TITLE="Upstream has $BEHIND new commit(s) to merge"
+          # Avoid duplicate issues: skip if an open one with this title already exists.
+          EXISTING=$(gh issue list --state open --search "$TITLE in:title" --json number --jq 'length')
+          if [ "$EXISTING" = "0" ]; then
+            gh issue create --title "$TITLE" \
+              --body "The author (bilawalsidhu/gods-eye-view) pushed $BEHIND new commit(s).
+
+          Pull them in locally with:
+
+              ./scripts/update-from-upstream.sh
+
+          Then resolve any conflicts (likely only in files we edited), run \`npm test\`, and \`git push origin main\`."
+          else
+            echo "An open issue for this already exists; skipping."
+          fi
