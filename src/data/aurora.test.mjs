@@ -12,6 +12,9 @@ import {
   parseOvation,
   selectAuroraCohort,
 } from './aurora.js';
+import auroraLayer from './aurora.js';
+import { DataLayerManager } from './manager.js';
+import { LAYER_STATE_REGISTRY } from './layerState.js';
 
 void Cesium; // parity with sibling tests; the module imports Cesium at load
 
@@ -121,4 +124,23 @@ test('layer exposes the manager contract and clean initial stats', () => {
 test('exported budget constants are sane defaults', () => {
   assert.ok(AURORA_MIN_PROBABILITY > 0 && AURORA_MIN_PROBABILITY < 100);
   assert.ok(AURORA_MAX_POINTS > 0);
+});
+
+// Regression: a registered layer MUST have a matching share-link registry entry,
+// or DataLayerManager.finalizeRegistrations() throws at startup with
+// "Layer serialization registry mismatch (missing: aurora; ...)".
+test('aurora is declared in the share-link registry, matching the layer id', () => {
+  const entry = LAYER_STATE_REGISTRY.find((e) => e.id === 'aurora');
+  assert.ok(entry, 'aurora missing from LAYER_STATE_REGISTRY');
+  assert.equal(entry.id, auroraLayer.id);
+  assert.equal(entry.disposition, 'enabled-only'); // no persisted options
+  assert.match(entry.token, /^[a-z0-9]$/); // single-char, registry-validated
+});
+
+test('registering aurora finalizes cleanly against its registry entry', () => {
+  const manager = new DataLayerManager({}, {}); // stub viewer; ctor touches none of it
+  manager.register(auroraLayer);
+  const auroraEntry = LAYER_STATE_REGISTRY.find((e) => e.id === 'aurora');
+  // This is the exact call that failed at launch before the registry entry existed.
+  assert.doesNotThrow(() => manager.finalizeRegistrations([auroraEntry]));
 });

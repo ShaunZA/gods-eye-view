@@ -57,8 +57,13 @@ feed (`flights.js`, `aisLiveVessels.js`, `satellites.js`, `earthquakes.js`, `cct
 `traffic.js`, `rocketLaunches.js`, `bikeshare.js`, …) is a **layer module with a lifecycle
 contract** (enable / disable / update / params) that the manager drives. The manager owns
 per-layer feed-state (the ON/LOADING/DEGRADED/STALE/FALLBACK/UNAVAILABLE labels), visibility
-intent, and serialization. **To add a data source, write a new layer module in `src/data/` and
-register it in `main.js`'s layer imports** — do not thread it through `ui.js`. Layers request
+intent, and serialization. **To add a data source: (1) write a new layer module in `src/data/`, (2)
+register it in `main.js`, and (3) add a `LAYER_STATE_REGISTRY` entry in
+`src/data/layerState.js`** (a unique single-char `token` + a `disposition` —
+`enabled-only` for a plain on/off layer). Step 3 is easy to miss: the manager's
+`finalizeRegistrations()` seals every registered layer against that registry at
+startup and throws `Layer serialization registry mismatch (missing: <id>)` if
+it's absent. Do not thread new layers through `ui.js`. Layers request
 redraws through the render governor rather than forcing continuous rendering.
 
 **`vite.config.js` is a backend, not just build config.** It installs dev-server **proxy
